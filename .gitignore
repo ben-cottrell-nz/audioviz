@@ -1,0 +1,5 @@
+/.vs/**
+/build-win/**
+/cmake-build-debug/**
+/out/**
+/.~lock.planning-diagram.odg#
