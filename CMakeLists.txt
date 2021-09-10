@@ -16,6 +16,7 @@ if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
 	set(RTAUDIO_PATH /home/ben/Documents/repos/rtaudio)
 elseif (WIN32)
 	set(RTAUDIO_PATH "C:/Users/ben/Downloads/rtaudio-5.1.0")
+	add_link_options(-pthread -static-libgcc -static-libstdc++ -mwindows)
 endif()
 include_directories(Qt5::Multimedia ${RTAUDIO_PATH})
 link_directories(${RTAUDIO_PATH}/build)
@@ -33,9 +34,11 @@ target_link_libraries(audioviz
         Qt5::Widgets
         Qt5::Multimedia
         rtaudio
+		fftw3
         )
-if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
-	target_link_libraries(audioviz
-			fftw3)
-endif()
+if (WIN32)
+target_link_libraries(audioviz
+	pthread)
+	endif()
+
 
