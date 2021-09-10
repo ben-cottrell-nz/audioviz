@@ -24,6 +24,7 @@ public:
     STOPPED,
     BROKEN
   } state;
+  double samplingRate();
 
   /*!
    * Called from record

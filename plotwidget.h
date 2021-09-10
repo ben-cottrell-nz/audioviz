@@ -4,23 +4,34 @@
 #include <QObject>
 #include <QWidget>
 #include <QPainterPath>
+#include <QTimer>
+#include <fftw3.h>
 
 using sample_t = signed short;
 
-class PlotWidget : public QWidget
-{
-    Q_OBJECT
+class PlotWidget : public QWidget {
+Q_OBJECT
 public:
-    explicit PlotWidget(QWidget *parent = nullptr);
-    ~PlotWidget();
+  explicit PlotWidget(QWidget *parent = nullptr);
+  ~PlotWidget();
+  void setDisplayMode(int);
+  enum DisplayMode {
+    OSCILLOSCOPE,
+    SPECTROGRAPH
+  };
 protected:
-    void paintEvent(QPaintEvent*);
-    void resizeEvent(QResizeEvent*);
+  void paintEvent(QPaintEvent *);
+  void resizeEvent(QResizeEvent *);
 private:
-    const sample_t* audioBuffer;
-    int audioBufferLength;
-    QPolygonF plotPath;
-    double barWidth;
+  const sample_t *audioBuffer;
+  int audioBufferLength;
+  QPolygonF plotPath;
+  double barWidth;
+  QTimer repaintTimer;
+  int displayMode;
+  fftw_plan fftwPlan;
+  fftw_complex *fftOutput;
+  QVector<double> fftRealInput;
 };
 
 #endif // PLOTWIDGET_H

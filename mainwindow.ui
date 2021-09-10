@@ -14,7 +14,22 @@
    <string>AudioViz</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout"/>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item alignment="Qt::AlignTop">
+     <widget class="QComboBox" name="displayModeComboBox">
+      <item>
+       <property name="text">
+        <string>Oscilloscope</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Spectrograph</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

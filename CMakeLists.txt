@@ -34,4 +34,8 @@ target_link_libraries(audioviz
         Qt5::Multimedia
         rtaudio
         )
+if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
+	target_link_libraries(audioviz
+			fftw3)
+endif()
 
