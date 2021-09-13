@@ -65,13 +65,14 @@ void PlotWidget::paintEvent(QPaintEvent *) {
   } else if (displayMode == DisplayMode::SPECTROGRAPH) {
 //    double freqBinSize = (double) 44100 / BUFFER_FRAMES;
     double freq = 0;
-    double freqBinSize = (double)44100 / BUFFER_FRAMES;
+    double freqBinSize = (double) 44100 / BUFFER_FRAMES;
     double freqBin = 0;
     barWidth *= 2;
     const int max_frames = BUFFER_FRAMES / 2;
     const double ONE_OVER_HS = 1.0 / (44100 / 2);
     QRect lastTextRect;
     int nSkipBins = 0;
+    QRectF labelRect;
     for (int i = 0; i < max_frames; i++) {
       freq = sqrt(pow(fftOutput[i][0], 2) + pow(fftOutput[i][1], 2));
       painter.fillRect(
@@ -80,14 +81,22 @@ void PlotWidget::paintEvent(QPaintEvent *) {
       //make sure there's enough room to draw text
       if (nSkipBins == 30) {
         QString freqBinText = QString::asprintf("%.2f", freqBin);
+        labelRect = painter.fontMetrics().boundingRect(freqBinText);
+        painter.drawLine(i * barWidth, height() * 0.5, i * barWidth, height() * 0.5 + 15);
         //lastTextRect = painter.fontMetrics().boundingRect(freqBinText);
-        painter.drawText(i * barWidth /*- (i * barWidth / 2)*/, height() * 0.5 + 15, freqBinText);
+        painter.drawText(i * barWidth - labelRect.width() * 0.5, height() * 0.5 + 30, freqBinText);
         nSkipBins = 0;
       } else {
         nSkipBins++;
       }
       freqBin += freqBinSize;
     }
+    QFont font = painter.font();
+    font.setBold(true);
+    painter.setFont(font);
+    painter.drawText(width() * 0.5 - painter.fontMetrics().horizontalAdvance("Frequency (Hz)") * 0.5,
+                     height() * 0.5 + 60,
+                     "Frequency (Hz)");
   }
 
 }
