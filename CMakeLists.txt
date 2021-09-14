@@ -13,18 +13,25 @@ find_package(Qt5 COMPONENTS
         Multimedia
         REQUIRED)
 if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
-	set(RTAUDIO_PATH /home/ben/Documents/repos/rtaudio)
+    set(RTAUDIO_PATH /home/ben/Documents/repos/rtaudio)
 elseif (WIN32)
-	set(RTAUDIO_PATH "C:/Users/ben/Downloads/rtaudio-5.1.0")
-	add_link_options(-pthread -static-libgcc -static-libstdc++ -mwindows)
-endif()
+    set(RTAUDIO_PATH "C:/Users/ben/Downloads/rtaudio-5.1.0")
+    add_link_options(-pthread -static-libgcc -static-libstdc++ -mwindows)
+endif ()
 include_directories(Qt5::Multimedia ${RTAUDIO_PATH})
 link_directories(${RTAUDIO_PATH}/build)
 add_executable(audioviz
         main.cpp
         mainwindow.cpp
         plotwidget.cpp
-        audioengine.cpp)
+        audioengine.cpp
+        resources.qrc
+        settingsdialog.cpp
+        settingsdialog.h
+        settingsdialog.ui
+        aboutdialog.cpp
+        aboutdialog.h
+        aboutdialog.ui configmanager.cpp configmanager.h)
 
 add_executable(test test.cpp)
 target_link_libraries(test rtaudio)
@@ -34,11 +41,11 @@ target_link_libraries(audioviz
         Qt5::Widgets
         Qt5::Multimedia
         rtaudio
-		fftw3
+        fftw3
         )
 if (WIN32)
-target_link_libraries(audioviz
-	pthread)
-	endif()
+    target_link_libraries(audioviz
+            pthread)
+endif ()
 
 

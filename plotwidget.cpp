@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <cmath>
+#include "configmanager.h"
 
 void hamming(double *in, int num_samples) {
   // https://github.com/audacity/audacity/blob/c5ebc396eb06857b4509101fdd2b0620dc0658b3/src/FFT.cpp#L344
@@ -21,41 +22,47 @@ PlotWidget::PlotWidget(QWidget *parent) : QWidget(parent) {
   repaintTimer.setInterval(16);
   displayMode = DisplayMode::OSCILLOSCOPE;
   fftRealInput.resize(BUFFER_FRAMES);
-  QObject::connect(&repaintTimer,
-                   &QTimer::timeout,
-                   this,
-                   [this]() {
-                     repaint();
-                   });
+  connect(&repaintTimer,
+          &QTimer::timeout,
+          this,
+          [this]() {
+            repaint();
+          });
+  connect(ConfigManagerInstance(),
+          &ConfigManager::colorsChanged,
+          this,
+          &PlotWidget::updateColors);
+  fgColor = ConfigManagerInstance()->getProp("foreground-color");
+  bgColor = ConfigManagerInstance()->getProp("background-color");
   repaintTimer.start();
   fftOutput = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * BUFFER_FRAMES);
   fftwPlan = fftw_plan_dft_r2c_1d(BUFFER_FRAMES,
                                   fftRealInput.data(),
                                   fftOutput,
                                   FFTW_ESTIMATE);
-  QObject::connect(AudioEngineInstance(),
-                   &AudioEngine::bufferReady,
-                   this,
-                   [this](const sample_t *buffer, const int length) {
-                     audioBuffer = buffer;
-                     audioBufferLength = length;
-                     if (displayMode == DisplayMode::SPECTROGRAPH) {
-                       //convert to double
-                       for (int i = 0; i < BUFFER_FRAMES; i++) {
-                         fftRealInput[i] = audioBuffer[i] * ONE_OVER_SAMPLE_T;
-                       }
-                       hamming(fftRealInput.data(), BUFFER_FRAMES);
-                       fftw_execute(fftwPlan);
-                     }
-                   });
+  connect(AudioEngineInstance(),
+          &AudioEngine::bufferReady,
+          this,
+          [this](const sample_t *buffer, const int length) {
+            audioBuffer = buffer;
+            audioBufferLength = length;
+            if (displayMode == DisplayMode::SPECTROGRAPH) {
+              //convert to double
+              for (int i = 0; i < BUFFER_FRAMES; i++) {
+                fftRealInput[i] = audioBuffer[i] * ONE_OVER_SAMPLE_T;
+              }
+              hamming(fftRealInput.data(), BUFFER_FRAMES);
+              fftw_execute(fftwPlan);
+            }
+          });
   AudioEngineInstance()->startListening();
 }
 
 void PlotWidget::paintEvent(QPaintEvent *) {
   QPainter painter(this);
   barWidth = (double) width() / BUFFER_FRAMES;
-  painter.fillRect(rect(), QColor(0, 0, 0));
-  painter.setPen(QPen(QColor(0, 255, 0), 2));
+  painter.fillRect(rect(), bgColor);
+  painter.setPen(QPen(fgColor));
   if (displayMode == DisplayMode::OSCILLOSCOPE) {
     for (int i = 0; i < BUFFER_FRAMES; i++) {
       plotPath[i] = QPointF(i * barWidth,
@@ -112,4 +119,9 @@ void PlotWidget::resizeEvent(QResizeEvent *e) {
 }
 void PlotWidget::setDisplayMode(int index) {
   displayMode = index;
+}
+void PlotWidget::updateColors(QColor fg, QColor bg) {
+  qDebug() << "in " << __PRETTY_FUNCTION__ << " fg:" << fg;
+  fgColor = fg;
+  bgColor = bg;
 }

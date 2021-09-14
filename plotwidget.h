@@ -19,12 +19,14 @@ public:
     OSCILLOSCOPE,
     SPECTROGRAPH
   };
+  void updateColors(QColor fg, QColor bg);
 protected:
   void paintEvent(QPaintEvent *);
   void resizeEvent(QResizeEvent *);
 private:
   const sample_t *audioBuffer;
   int audioBufferLength;
+  QColor fgColor,bgColor;
   QPolygonF plotPath;
   double barWidth;
   QTimer repaintTimer;
