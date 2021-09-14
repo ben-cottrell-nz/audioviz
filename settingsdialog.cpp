@@ -20,10 +20,10 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
   ui->frameBGColor->setPalette(pal);
   //fgcolorselect
   connect(ui->buttonFGColorSelect,
-          &QPushButton::clicked,
+          &QPushButton::pressed,
           this,
           [this](){
-    QColorDialog dialog;
+    QColorDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
       QPalette pal = ui->frameFGColor->palette();
       QColor selCol = dialog.selectedColor();
@@ -33,17 +33,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     }
   });
   //bgcolorselect
-  connect(ui->buttonFGColorSelect,
-          &QPushButton::clicked,
+  connect(ui->buttonBGColorSelect,
+          &QPushButton::pressed,
           this,
           [this](){
     QColorDialog dialog;
     if (dialog.exec() == QDialog::Accepted) {
-      QPalette pal = ui->frameFGColor->palette();
+      QPalette pal = ui->frameBGColor->palette();
       QColor selCol = dialog.selectedColor();
       pal.setColor(QPalette::Window, selCol);
-      ui->frameFGColor->setPalette(pal);
-
+      ui->frameBGColor->setPalette(pal);
+      dialog.close();
     }
   });
   connect(ui->buttonBox,
