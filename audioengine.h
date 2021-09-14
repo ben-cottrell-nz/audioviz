@@ -31,6 +31,7 @@ public:
    */
   void recordCallbackBufferReady(const sample_t *, const uint);
 signals:
+  void ready(RtAudio*);
   void bufferReady(const sample_t *, const uint);
 public:
   RtAudio rtAdc;
@@ -50,6 +51,7 @@ public:
   ~AudioEngine();
   void startListening();
   void stopListening();
+  QString audioAPIName;
 signals:
   /*!
    * Triggered when the buffer is filled by the worker thread
@@ -58,6 +60,7 @@ signals:
    */
   void bufferReady(const sample_t *buffer, const int length);
 private:
+
   AudioEngineWorker *worker;
   QThread workerThread;
 };

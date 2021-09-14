@@ -84,7 +84,7 @@ void PlotWidget::paintEvent(QPaintEvent *) {
       freq = sqrt(pow(fftOutput[i][0], 2) + pow(fftOutput[i][1], 2));
       painter.fillRect(
           QRectF(i * barWidth, height() * 0.5, barWidth, -freq * height() * 0.5),
-          QColor(0, 255, 0));
+          fgColor);
       //make sure there's enough room to draw text
       if (nSkipBins == 30) {
         QString freqBinText = QString::asprintf("%.2f", freqBin);

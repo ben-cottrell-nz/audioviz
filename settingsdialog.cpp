@@ -6,6 +6,7 @@
 
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
+#include "audioengine.h"
 #include "configmanager.h"
 #include <QColorDialog>
 
@@ -18,6 +19,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
   pal = ui->frameBGColor->palette();
   pal.setColor(QPalette::Window, ConfigManagerInstance()->getProp("background-color"));
   ui->frameBGColor->setPalette(pal);
+  ui->labelAPI->setText(AudioEngineInstance()->audioAPIName);
   //fgcolorselect
   connect(ui->buttonFGColorSelect,
           &QPushButton::pressed,
@@ -29,7 +31,6 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
       QColor selCol = dialog.selectedColor();
       pal.setColor(QPalette::Window, selCol);
       ui->frameFGColor->setPalette(pal);
-      ConfigManagerInstance()->setProp("foreground-color", selCol);
     }
   });
   //bgcolorselect
