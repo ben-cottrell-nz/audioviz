@@ -146,13 +146,13 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox"/>
+           <widget class="QComboBox" name="comboInputDevices"/>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox_3"/>
+           <widget class="QComboBox" name="comboSamplingRates"/>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox">
+           <widget class="QSpinBox" name="spinBufferSize">
             <property name="minimum">
              <number>16</number>
             </property>
@@ -168,7 +168,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox_2">
+           <widget class="QComboBox" name="comboNumChannels">
             <item>
              <property name="text">
               <string>1</string>

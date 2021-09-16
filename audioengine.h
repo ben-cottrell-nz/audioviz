@@ -49,9 +49,17 @@ Q_OBJECT
 public:
   explicit AudioEngine(QObject *parent = nullptr);
   ~AudioEngine();
+  void restart();
   void startListening();
   void stopListening();
   QString audioAPIName;
+  QStringList availableInputDevices;
+  struct InputDeviceInfo {
+    QStringList availableChannels;
+    QStringList availableSamplingRates;
+    int currentSamplingRateIndex;
+  };
+  QVector<InputDeviceInfo> inputDevicesInfo;
 signals:
   /*!
    * Triggered when the buffer is filled by the worker thread

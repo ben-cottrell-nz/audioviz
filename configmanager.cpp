@@ -8,13 +8,16 @@
 #include <QColor>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QStandardPaths>
+static const QString config_file_path = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppConfigLocation) +
+    "/config.json";
 ConfigManager *ConfigManagerInstance() {
   static ConfigManager singleton;
   return &singleton;
 }
 ConfigManager::ConfigManager() {
-  QFile configFile("config.json");
-  if (!QFile::exists("config.json")) {
+  QFile configFile(config_file_path);
+  if (!QFile::exists(config_file_path)) {
     configFile.open(QIODevice::OpenModeFlag::WriteOnly);
     document = QJsonDocument::fromJson(R"(
 {
@@ -29,8 +32,8 @@ ConfigManager::ConfigManager() {
     document = QJsonDocument::fromJson(configFile.readAll());
   }
 }
-void ConfigManager::setProp(const QString prop, const QColor &color) {
-  qDebug() << __PRETTY_FUNCTION__ << " prop " << prop << " color " << color;
+void ConfigManager::setPropColor(const QString prop, const QColor &color) {
+  //qDebug() << __PRETTY_FUNCTION__ << " prop " << prop << " color " << color;
   QJsonObject jsonObj = document.object();
   jsonObj[prop] = QJsonValue({color.red(), color.green(), color.blue()});
   document.setObject(jsonObj);
@@ -39,11 +42,11 @@ void ConfigManager::setProp(const QString prop, const QColor &color) {
   emit colorsChanged(fgColor,bgColor);
 }
 void ConfigManager::save() {
-  QFile configFile("config.json");
+  QFile configFile(config_file_path);
   configFile.open(QIODevice::OpenModeFlag::WriteOnly);
   configFile.write(document.toJson());
 }
-QColor ConfigManager::getProp(const QString prop) {
+QColor ConfigManager::getPropColor(const QString prop) {
   return jsonValueToColor(document.object()[prop]);
 }
 ConfigManager::~ConfigManager() {
@@ -54,4 +57,12 @@ QColor ConfigManager::jsonValueToColor(const QJsonValue &val) {
   return QColor{array[0].toInt(),
                 array[1].toInt(),
                 array[2].toInt()};
+}
+QString ConfigManager::getPropString(const QString prop) {
+  return QString(document.object()[prop].toString());
+}
+void ConfigManager::setPropString(const QString prop, const QString &val) {
+  QJsonObject jsonObj = document.object();
+  jsonObj[prop] = QJsonValue{val};
+  document.setObject(jsonObj);
 }

@@ -32,8 +32,8 @@ PlotWidget::PlotWidget(QWidget *parent) : QWidget(parent) {
           &ConfigManager::colorsChanged,
           this,
           &PlotWidget::updateColors);
-  fgColor = ConfigManagerInstance()->getProp("foreground-color");
-  bgColor = ConfigManagerInstance()->getProp("background-color");
+  fgColor = ConfigManagerInstance()->getPropColor("foreground-color");
+  bgColor = ConfigManagerInstance()->getPropColor("background-color");
   repaintTimer.start();
   fftOutput = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * BUFFER_FRAMES);
   fftwPlan = fftw_plan_dft_r2c_1d(BUFFER_FRAMES,
