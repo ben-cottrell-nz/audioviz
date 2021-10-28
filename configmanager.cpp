@@ -9,14 +9,23 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QStandardPaths>
-static const QString config_file_path = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppConfigLocation) +
-    "/config.json";
-ConfigManager *ConfigManagerInstance() {
+#include <QDir>
+static const QString config_file_parent_dir = QStandardPaths::writableLocation(
+    QStandardPaths::StandardLocation::AppConfigLocation) +
+        "/audioviz";
+static const QString config_file_path = config_file_parent_dir + "/config.json";
+ConfigManager* ConfigManagerInstance() {
   static ConfigManager singleton;
   return &singleton;
 }
 ConfigManager::ConfigManager() {
+#ifdef QT_DEBUG
+  qDebug() << "opening " + config_file_path;
+#endif
   QFile configFile(config_file_path);
+  if (!QDir(config_file_parent_dir).exists()) {
+    QDir().mkdir(config_file_parent_dir);
+  }
   if (!QFile::exists(config_file_path)) {
     configFile.open(QIODevice::OpenModeFlag::WriteOnly);
     document = QJsonDocument::fromJson(R"(
@@ -28,41 +37,40 @@ ConfigManager::ConfigManager() {
     configFile.write(document.toJson());
     configFile.close();
   } else {
-    configFile.open(QIODevice::OpenModeFlag::ReadOnly);
+    configFile.open(QIODevice::OpenModeFlag::ReadWrite);
     document = QJsonDocument::fromJson(configFile.readAll());
   }
-}
-void ConfigManager::setPropColor(const QString prop, const QColor &color) {
-  //qDebug() << __PRETTY_FUNCTION__ << " prop " << prop << " color " << color;
-  QJsonObject jsonObj = document.object();
-  jsonObj[prop] = QJsonValue({color.red(), color.green(), color.blue()});
-  document.setObject(jsonObj);
-  QColor fgColor = jsonValueToColor(document.object()["foreground-color"]);
-  QColor bgColor = jsonValueToColor(document.object()["background-color"]);
-  emit colorsChanged(fgColor,bgColor);
 }
 void ConfigManager::save() {
   QFile configFile(config_file_path);
   configFile.open(QIODevice::OpenModeFlag::WriteOnly);
   configFile.write(document.toJson());
 }
-QColor ConfigManager::getPropColor(const QString prop) {
-  return jsonValueToColor(document.object()[prop]);
-}
 ConfigManager::~ConfigManager() {
   save();
 }
-QColor ConfigManager::jsonValueToColor(const QJsonValue &val) {
-  QJsonArray array = val.toArray();
-  return QColor{array[0].toInt(),
-                array[1].toInt(),
-                array[2].toInt()};
+QVariant ConfigManager::getProp(const QString& key) {
+  return document.object()[key].toVariant();
 }
-QString ConfigManager::getPropString(const QString prop) {
-  return QString(document.object()[prop].toString());
+QColor ConfigManager::getPropColor(const QString& key) {
+  QJsonArray array = getProp(key).toJsonArray();
+#ifdef QT_DEBUG
+  qDebug() << "prop color " << key << ": " << document.object()[key].toVariant().toList();
+#endif
+  return {(uint8_t)array[0].toInt(),
+          (uint8_t)array[1].toInt(),
+          (uint8_t)array[2].toInt()};
 }
-void ConfigManager::setPropString(const QString prop, const QString &val) {
+QString ConfigManager::getPropString(const QString& key) {
+  return getProp(key).toString();
+}
+void ConfigManager::setProp(const QString &key, const QVariant &value) {
   QJsonObject jsonObj = document.object();
-  jsonObj[prop] = QJsonValue{val};
+  jsonObj[key] = value.toJsonValue();
   document.setObject(jsonObj);
+  emit settingsChanged();
+}
+void ConfigManager::setPropColor(const QString &key, const QColor &value) {
+  QList<QVariant> arrayValue = {value.red(),value.green(),value.blue()};
+  setProp(key, QVariant::fromValue(arrayValue));
 }

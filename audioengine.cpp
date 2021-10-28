@@ -3,7 +3,12 @@
 #include <QDebug>
 
 AudioEngine::AudioEngine(QObject *parent) : QObject(parent) {
-
+  connect(ConfigManagerInstance(),
+          &ConfigManager::settingsChanged,
+          this,
+          [this](){
+    restart();
+  });
 }
 
 void AudioEngine::startListening() {
@@ -91,6 +96,11 @@ int record(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames,
   return 0;
 }
 
+void errorcb( RtAudioError::Type type, const std::string &errorText )
+{
+  qDebug() << "error: " << errorText.data();
+}
+
 void AudioEngineWorker::run() {
   if (rtAdc.getDeviceCount() < 1) {
     std::cout << "\nNo audio devices found!\n";
@@ -107,8 +117,7 @@ void AudioEngineWorker::run() {
   if (inputDeviceNameProp.isEmpty()) {
     rtParameters.deviceId = rtAdc.getDefaultInputDevice();
     inputDeviceInfo = rtAdc.getDeviceInfo(rtParameters.deviceId);
-    ConfigManagerInstance()->setPropString("input-device", inputDeviceInfo.name.data());
-
+    ConfigManagerInstance()->setProp("input-device", inputDeviceInfo.name.data());
   } else {
     //find the matching device id by string
     bool found = false;
@@ -126,14 +135,14 @@ void AudioEngineWorker::run() {
       //correct the incompatible input device
       rtParameters.deviceId = rtAdc.getDefaultInputDevice();
       inputDeviceInfo = rtAdc.getDeviceInfo(rtParameters.deviceId);
-      ConfigManagerInstance()->setPropString("input-device", QString(inputDeviceInfo.name.data()));
+      ConfigManagerInstance()->setProp("input-device", QString(inputDeviceInfo.name.data()));
     }
   }
   //sampling rate
   QString sampleRateProp = ConfigManagerInstance()->getPropString("sampling-rate");
   if (sampleRateProp.isEmpty()) {
     sampleRate = inputDeviceInfo.preferredSampleRate;
-    ConfigManagerInstance()->setPropString("sampling-rate", QString::number(sampleRate));
+    ConfigManagerInstance()->setProp("sampling-rate", QString::number(sampleRate));
   } else {
     bool found = false;
     for (auto &r:inputDeviceInfo.sampleRates) {
@@ -147,7 +156,7 @@ void AudioEngineWorker::run() {
     } else {
       //correct the incompatible sample rate
       sampleRate = inputDeviceInfo.preferredSampleRate;
-      ConfigManagerInstance()->setPropString("sampling-rate", QString::number(sampleRate));
+      ConfigManagerInstance()->setProp("sampling-rate", QString::number(sampleRate));
     }
   }
   bufferFrames = 512;
@@ -155,7 +164,7 @@ void AudioEngineWorker::run() {
   rtParameters.firstChannel = 0;
   try {
     rtAdc.openStream(nullptr, &rtParameters, RTAUDIO_SINT16,
-                     sampleRate, &bufferFrames, &record, this);
+                     sampleRate, &bufferFrames, &record, this, 0, &errorcb);
     rtAdc.startStream();
     emit ready(&rtAdc);
   }
@@ -163,13 +172,14 @@ void AudioEngineWorker::run() {
     e.printMessage();
     exit(0);
   }
-  //while (state == RUNNING);
 }
 
 void AudioEngineWorker::stop() {
   state = STOPPED;
-  rtAdc.stopStream();
-  rtAdc.closeStream();
+  if (rtAdc.isStreamOpen()) {
+    rtAdc.stopStream();
+    rtAdc.closeStream();
+  }
 }
 
 void AudioEngineWorker::recordCallbackBufferReady(const sample_t *buffer, const uint length) {

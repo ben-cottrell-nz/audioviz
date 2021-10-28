@@ -2,7 +2,7 @@
 #define AUDIOENGINE_H
 
 #include <QObject>
-#include <QtMultimedia/QAudioInput>
+//#include <QtMultimedia/QAudioInput>
 #include <QBuffer>
 #include <QThread>
 #include <functional>

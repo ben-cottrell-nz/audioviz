@@ -29,9 +29,11 @@ PlotWidget::PlotWidget(QWidget *parent) : QWidget(parent) {
             repaint();
           });
   connect(ConfigManagerInstance(),
-          &ConfigManager::colorsChanged,
+          &ConfigManager::settingsChanged,
           this,
-          &PlotWidget::updateColors);
+          [this]() {
+            updateColors();
+          });
   fgColor = ConfigManagerInstance()->getPropColor("foreground-color");
   bgColor = ConfigManagerInstance()->getPropColor("background-color");
   repaintTimer.start();
@@ -104,6 +106,8 @@ void PlotWidget::paintEvent(QPaintEvent *) {
     painter.drawText(width() * 0.5 - painter.fontMetrics().horizontalAdvance("Frequency (Hz)") * 0.5,
                      height() * 0.5 + 60,
                      "Frequency (Hz)");
+  } else if (displayMode == DisplayMode::WATERFALL) {
+
   }
 
 }
@@ -120,7 +124,10 @@ void PlotWidget::resizeEvent(QResizeEvent *e) {
 void PlotWidget::setDisplayMode(int index) {
   displayMode = index;
 }
-void PlotWidget::updateColors(QColor fg, QColor bg) {
+void PlotWidget::updateColors() {
+  QColor fg, bg;
+  fg = ConfigManagerInstance()->getPropColor("foreground-color");
+  bg = ConfigManagerInstance()->getPropColor("background-color");
   qDebug() << "in " << __PRETTY_FUNCTION__ << " fg:" << fg;
   fgColor = fg;
   bgColor = bg;

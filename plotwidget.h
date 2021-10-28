@@ -17,9 +17,10 @@ public:
   void setDisplayMode(int);
   enum DisplayMode {
     OSCILLOSCOPE,
-    SPECTROGRAPH
+    SPECTROGRAPH,
+    WATERFALL
   };
-  void updateColors(QColor fg, QColor bg);
+  void updateColors();
 protected:
   void paintEvent(QPaintEvent *);
   void resizeEvent(QResizeEvent *);

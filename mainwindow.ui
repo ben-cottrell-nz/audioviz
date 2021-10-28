@@ -35,6 +35,11 @@
           <string>Spectrograph</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Waterfall</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

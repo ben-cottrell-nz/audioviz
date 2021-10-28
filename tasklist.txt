@@ -1,0 +1,7 @@
+v2:
+    incomplete:
+      - Fix "audio settings not being applied in settings dialog"
+    doing:
+      - Waterfall graph view mode for PlotWidget
+    done:
+      - Add "Waterfall" option to mode selector combo box

@@ -75,9 +75,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
                                                   ui->frameFGColor->palette().color(QPalette::Window));
             ConfigManagerInstance()->setPropColor("background-color",
                                                   ui->frameBGColor->palette().color(QPalette::Window));
-            ConfigManagerInstance()->setPropString("input-device",
+            ConfigManagerInstance()->setProp("input-device",
                                                    ui->comboInputDevices->currentText());
-            ConfigManagerInstance()->setPropString("sampling-rate",
+            ConfigManagerInstance()->setProp("sampling-rate",
                                                    ui->comboSamplingRates->currentText());
             //ConfigManagerInstance()->setPropColor("foreground-color",)
             AudioEngineInstance()->restart();

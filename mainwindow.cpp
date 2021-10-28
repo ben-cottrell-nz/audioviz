@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
               mPlotWidget.setDisplayMode(PlotWidget::DisplayMode::OSCILLOSCOPE);
             } else if (text == "Spectrograph") {
               mPlotWidget.setDisplayMode(PlotWidget::DisplayMode::SPECTROGRAPH);
+            } else if (text == "Waterfall") {
+              mPlotWidget.setDisplayMode(PlotWidget::DisplayMode::WATERFALL);
             }
           });
 //    setCentralWidget(&mPlotWidget);
